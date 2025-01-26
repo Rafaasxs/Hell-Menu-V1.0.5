@@ -37,139 +37,46 @@ local function makeDraggable(frame, dragHandle)
     end)
 end
 
-function lib:Window(t)
-    local w = Instance.new("Frame", gui)
-    w.Size = UDim2.new(0, 400, 0, 300)
-    w.Position = UDim2.new(0.5, -200, 0.5, -150)
-    w.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    w.BorderSizePixel = 0
+-- Cria a janela principal
+function lib:Window(title)
+    local window = Instance.new("Frame", gui)
+    window.Size = UDim2.new(0, 400, 0, 300)
+    window.Position = UDim2.new(0.5, -200, 0.5, -150)
+    window.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    window.BorderSizePixel = 0
 
-    local h = Instance.new("TextLabel", w)
-    h.Size = UDim2.new(1, 0, 0, 30)
-    h.Text = t
-    h.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    h.TextColor3 = Color3.new(1, 1, 1)
-    h.Font = Enum.Font.SourceSans
-    h.TextSize = 18
-    h.BorderSizePixel = 0
-    h.TextXAlignment = Enum.TextXAlignment.Left
+    local header = Instance.new("TextLabel", window)
+    header.Size = UDim2.new(1, 0, 0, 30)
+    header.Text = title
+    header.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    header.TextColor3 = Color3.new(1, 1, 1)
+    header.Font = Enum.Font.SourceSans
+    header.TextSize = 18
+    header.BorderSizePixel = 0
+    header.TextXAlignment = Enum.TextXAlignment.Left
 
-    local padding = Instance.new("UIPadding", h)
+    local padding = Instance.new("UIPadding", header)
     padding.PaddingLeft = UDim.new(0, 10)
 
-    makeDraggable(w, h)
+    makeDraggable(window, header)
 
-    -- Criar o container para os botões das abas
-    local tabButtonContainer = Instance.new("Frame", w)
-    tabButtonContainer.Size = UDim2.new(1, 0, 0, 30)
-    tabButtonContainer.Position = UDim2.new(0, 0, 0, 30)
-    tabButtonContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    tabButtonContainer.BorderSizePixel = 0
-
-    -- Criar o container para o conteúdo das abas
-    local tabContentContainer = Instance.new("Frame", w)
-    tabContentContainer.Size = UDim2.new(1, 0, 1, -60)
-    tabContentContainer.Position = UDim2.new(0, 0, 0, 60)
-    tabContentContainer.BackgroundTransparency = 1
-    tabContentContainer.Name = "TabContentContainer"
-
-    return {Main = w, TabButtonContainer = tabButtonContainer, TabContentContainer = tabContentContainer}
+    return window
 end
 
-function lib:Tab(window, t)
-    local tabButton = Instance.new("TextButton", window.TabButtonContainer)
-    tabButton.Size = UDim2.new(0, 80, 1, 0)
-    tabButton.Text = t
-    tabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    tabButton.TextColor3 = Color3.new(1, 1, 1)
-    tabButton.Font = Enum.Font.SourceSans
-    tabButton.TextSize = 16
-    tabButton.BorderSizePixel = 0
+-- Adiciona botões na janela
+function lib:Button(parent, text, callback)
+    local button = Instance.new("TextButton", parent)
+    button.Size = UDim2.new(1, -20, 0, 30)
+    button.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() - 1) * 40)
+    button.Text = text
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 16
+    button.BorderSizePixel = 0
 
-    local tabContent = Instance.new("Frame", window.TabContentContainer)
-    tabContent.Size = UDim2.new(1, 0, 1, 0)
-    tabContent.BackgroundTransparency = 1
-    tabContent.Visible = false
-
-    tabButton.MouseButton1Click:Connect(function()
-        for _, content in ipairs(window.TabContentContainer:GetChildren()) do
-            if content:IsA("Frame") then
-                content.Visible = false
-            end
-        end
-        tabContent.Visible = true
-    end)
-
-    -- Ativa a primeira aba automaticamente
-    if #window.TabButtonContainer:GetChildren() == 1 then
-        tabContent.Visible = true
-    end
-
-    return tabContent
-end
-
-function lib:Button(parent, t, f)
-    local b = Instance.new("TextButton", parent)
-    b.Size = UDim2.new(1, -20, 0, 30)
-    b.Position = UDim2.new(0, 10, 0, 10)
-    b.Text = t
-    b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.Font = Enum.Font.SourceSans
-    b.TextSize = 16
-    b.BorderSizePixel = 0
-    b.MouseButton1Click:Connect(f)
-    return b
-end
-
-function lib:Slider(parent, t, min, max, callback)
-    local sliderFrame = Instance.new("Frame", parent)
-    sliderFrame.Size = UDim2.new(1, -20, 0, 50)
-    sliderFrame.Position = UDim2.new(0, 10, 0, 50)
-    sliderFrame.BackgroundTransparency = 1
-
-    local sliderLabel = Instance.new("TextLabel", sliderFrame)
-    sliderLabel.Size = UDim2.new(1, 0, 0, 20)
-    sliderLabel.Text = t
-    sliderLabel.BackgroundTransparency = 1
-    sliderLabel.TextColor3 = Color3.new(1, 1, 1)
-    sliderLabel.Font = Enum.Font.SourceSans
-    sliderLabel.TextSize = 14
-
-    local sliderBar = Instance.new("Frame", sliderFrame)
-    sliderBar.Size = UDim2.new(1, 0, 0, 5)
-    sliderBar.Position = UDim2.new(0, 0, 0, 30)
-    sliderBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-
-    local sliderButton = Instance.new("Frame", sliderBar)
-    sliderButton.Size = UDim2.new(0, 10, 1, 0)
-    sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-
-    local dragging = false
-    sliderButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-        end
-    end)
-
-    sliderButton.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mouseX = math.clamp(input.Position.X - sliderBar.AbsolutePosition.X, 0, sliderBar.AbsoluteSize.X)
-            sliderButton.Position = UDim2.new(0, mouseX - sliderButton.Size.X.Offset / 2, 0, 0)
-            local value = math.floor(min + ((mouseX / sliderBar.AbsoluteSize.X) * (max - min)))
-            callback(value)
-        end
-    end)
-
-    return sliderFrame
+    button.MouseButton1Click:Connect(callback)
+    return button
 end
 
 return lib
-
-
