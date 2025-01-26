@@ -58,18 +58,27 @@ function lib:Window(t)
     padding.PaddingLeft = UDim.new(0, 10)
 
     makeDraggable(w, h)
-    return w
+
+    -- Criar o container para os botões das abas
+    local tabButtonContainer = Instance.new("Frame", w)
+    tabButtonContainer.Size = UDim2.new(1, 0, 0, 30)
+    tabButtonContainer.Position = UDim2.new(0, 0, 0, 30)
+    tabButtonContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    tabButtonContainer.BorderSizePixel = 0
+
+    -- Criar o container para o conteúdo das abas
+    local tabContentContainer = Instance.new("Frame", w)
+    tabContentContainer.Size = UDim2.new(1, 0, 1, -60)
+    tabContentContainer.Position = UDim2.new(0, 0, 0, 60)
+    tabContentContainer.BackgroundTransparency = 1
+    tabContentContainer.Name = "TabContentContainer"
+
+    return {Main = w, TabButtonContainer = tabButtonContainer, TabContentContainer = tabContentContainer}
 end
 
-function lib:Tab(w, t)
-    local tabHolder = w:FindFirstChild("TabHolder") or Instance.new("Frame", w)
-    tabHolder.Name = "TabHolder"
-    tabHolder.Size = UDim2.new(1, 0, 1, -30)
-    tabHolder.Position = UDim2.new(0, 0, 0, 30)
-    tabHolder.BackgroundTransparency = 1
-
-    local tabButton = Instance.new("TextButton", tabHolder)
-    tabButton.Size = UDim2.new(0, 80, 0, 30)
+function lib:Tab(window, t)
+    local tabButton = Instance.new("TextButton", window.TabButtonContainer)
+    tabButton.Size = UDim2.new(0, 80, 1, 0)
     tabButton.Text = t
     tabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     tabButton.TextColor3 = Color3.new(1, 1, 1)
@@ -77,20 +86,24 @@ function lib:Tab(w, t)
     tabButton.TextSize = 16
     tabButton.BorderSizePixel = 0
 
-    local tabContent = Instance.new("Frame", tabHolder)
-    tabContent.Size = UDim2.new(1, 0, 1, -30)
-    tabContent.Position = UDim2.new(0, 0, 0, 30)
+    local tabContent = Instance.new("Frame", window.TabContentContainer)
+    tabContent.Size = UDim2.new(1, 0, 1, 0)
     tabContent.BackgroundTransparency = 1
     tabContent.Visible = false
 
     tabButton.MouseButton1Click:Connect(function()
-        for _, child in ipairs(tabHolder:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
+        for _, content in ipairs(window.TabContentContainer:GetChildren()) do
+            if content:IsA("Frame") then
+                content.Visible = false
             end
         end
         tabContent.Visible = true
     end)
+
+    -- Ativa a primeira aba automaticamente
+    if #window.TabButtonContainer:GetChildren() == 1 then
+        tabContent.Visible = true
+    end
 
     return tabContent
 end
@@ -158,4 +171,5 @@ function lib:Slider(parent, t, min, max, callback)
 end
 
 return lib
+
 
