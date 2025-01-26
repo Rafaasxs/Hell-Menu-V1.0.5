@@ -8,6 +8,7 @@ function lib:Window(t)
     w.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     w.BorderSizePixel = 0
     w.Active = true
+    w.Draggable = false -- Será implementado manualmente
 
     local h = Instance.new("TextLabel", w)
     h.Size = UDim2.new(1, 0, 0, 30)
@@ -21,8 +22,11 @@ function lib:Window(t)
     h.Padding = Instance.new("UIPadding", h)
     h.Padding.Left = UDim.new(0, 10)
 
-    -- Sistema de Drag
-    local dragging, dragStart, startPos
+    -- Drag Manual
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+
     h.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
@@ -30,8 +34,9 @@ function lib:Window(t)
             startPos = w.Position
         end
     end)
+
     h.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
             w.Position = UDim2.new(
                 startPos.X.Scale, startPos.X.Offset + delta.X,
@@ -39,6 +44,7 @@ function lib:Window(t)
             )
         end
     end)
+
     h.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
@@ -63,3 +69,4 @@ function lib:Button(w, t, f)
 end
 
 return lib
+
