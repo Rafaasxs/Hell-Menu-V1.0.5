@@ -1,11 +1,14 @@
 local lib = {}
 local gui = Instance.new("ScreenGui", game.CoreGui)
+
 function lib:Window(t)
     local w = Instance.new("Frame", gui)
     w.Size = UDim2.new(0, 400, 0, 300)
     w.Position = UDim2.new(0.5, -200, 0.5, -150)
     w.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     w.BorderSizePixel = 0
+    w.Active = true
+
     local h = Instance.new("TextLabel", w)
     h.Size = UDim2.new(1, 0, 0, 30)
     h.Text = t
@@ -17,6 +20,31 @@ function lib:Window(t)
     h.TextXAlignment = Enum.TextXAlignment.Left
     h.Padding = Instance.new("UIPadding", h)
     h.Padding.Left = UDim.new(0, 10)
+
+    -- Sistema de Drag
+    local dragging, dragStart, startPos
+    h.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = w.Position
+        end
+    end)
+    h.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            local delta = input.Position - dragStart
+            w.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    h.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
     return w
 end
 
@@ -35,4 +63,3 @@ function lib:Button(w, t, f)
 end
 
 return lib
-
