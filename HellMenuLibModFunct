@@ -1,14 +1,48 @@
 local lib = {}
 local gui = Instance.new("ScreenGui", game.CoreGui)
 
+-- Função de Drag
+local function makeDraggable(frame, dragHandle)
+    local dragging, dragInput, startPos, dragStart = false, nil, nil, nil
+
+    dragHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    dragHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
 function lib:Window(t)
     local w = Instance.new("Frame", gui)
     w.Size = UDim2.new(0, 400, 0, 300)
     w.Position = UDim2.new(0.5, -200, 0.5, -150)
     w.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     w.BorderSizePixel = 0
-    w.Active = true
-    w.Draggable = false -- Será implementado manualmente
 
     local h = Instance.new("TextLabel", w)
     h.Size = UDim2.new(1, 0, 0, 30)
@@ -19,37 +53,12 @@ function lib:Window(t)
     h.TextSize = 18
     h.BorderSizePixel = 0
     h.TextXAlignment = Enum.TextXAlignment.Left
-    h.Padding = Instance.new("UIPadding", h)
-    h.Padding.Left = UDim.new(0, 10)
 
-    -- Drag Manual
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
+    local padding = Instance.new("UIPadding", h)
+    padding.PaddingLeft = UDim.new(0, 10)
 
-    h.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = w.Position
-        end
-    end)
-
-    h.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            w.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    h.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
+    -- Torna a janela arrastável
+    makeDraggable(w, h)
 
     return w
 end
@@ -69,4 +78,3 @@ function lib:Button(w, t, f)
 end
 
 return lib
-
